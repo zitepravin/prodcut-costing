@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    # Literal local defaults (not ${DB_PASSWORD:...}) so a leftover Windows/env
+    # DB_PASSWORD cannot override the working costing_app password.
+    url: jdbc:mysql://127.0.0.1:3306/product_costing?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+    username: costing_app
+    password: changeme1
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+  flyway:
+    enabled: true
+
+server:
+  port: 8088
+
+app:
+  security:
+    require-strong-jwt-secret: false
+    swagger-public: true
+    cors-allowed-origins: "*"
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  health:
+    mail:
+      enabled: false

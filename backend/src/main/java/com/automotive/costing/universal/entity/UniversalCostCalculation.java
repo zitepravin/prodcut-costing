@@ -1,0 +1,41 @@
+package com.automotive.costing.universal.entity;
+import jakarta.persistence.*; import lombok.*;
+import java.math.BigDecimal; import java.time.Instant; import java.time.LocalDate;
+@Getter @Setter @NoArgsConstructor @Entity @Table(name="universal_cost_calculation")
+public class UniversalCostCalculation {
+  @Id @Column(name="calculation_id",length=36,nullable=false,updatable=false,columnDefinition="CHAR(36)") private String calculationId;
+  @Column(name="customer_id",length=36,nullable=false,columnDefinition="CHAR(36)") private String customerId;
+  @Column(name="cost_object_id",length=36,nullable=false,columnDefinition="CHAR(36)") private String costObjectId;
+  @Column(name="cost_method",length=40,nullable=false) private String costMethod;
+  @Column(name="calculation_date",nullable=false) private LocalDate calculationDate;
+  @Column(name="as_of_date") private LocalDate asOfDate;
+  @Column(name="currency_code",length=3,nullable=false,columnDefinition="CHAR(3)") private String currencyCode="USD";
+  @Column(name="total_cost",precision=18,scale=6,nullable=false) private BigDecimal totalCost=BigDecimal.ZERO;
+  @Column(name="unit_cost",precision=18,scale=6) private BigDecimal unitCost;
+  @Column(name="quantity",precision=18,scale=6) private BigDecimal quantity;
+  @Column(name="component_breakdown",columnDefinition="JSON") private String componentBreakdown;
+  @Column(name="driver_usage_json",columnDefinition="JSON") private String driverUsageJson;
+  @Column(name="allocation_json",columnDefinition="JSON") private String allocationJson;
+  @Column(name="version_no",nullable=false) private int versionNo=1;
+  @Column(name="lifecycle_status",length=20,nullable=false) private String lifecycleStatus="DRAFT";
+  @Column(name="industry_profile",length=64) private String industryProfile;
+  @Column(name="created_by",length=64) private String createdBy;
+  @Column(name="approved_by",length=64) private String approvedBy;
+  @Column(name="approved_at") private Instant approvedAt;
+  @Column(name="created_at",nullable=false) private Instant createdAt;
+  @Column(name="technical_total",precision=18,scale=6) private BigDecimal technicalTotal;
+  @Column(name="commercial_total",precision=18,scale=6) private BigDecimal commercialTotal;
+  @Column(name="selling_price",precision=18,scale=6) private BigDecimal sellingPrice;
+  @Column(name="discount_amount",precision=18,scale=6) private BigDecimal discountAmount;
+  @Column(name="royalty_amount",precision=18,scale=6) private BigDecimal royaltyAmount;
+  @Column(name="profit_margin_amount",precision=18,scale=6) private BigDecimal profitMarginAmount;
+  @Column(name="commercial_expense_amount",precision=18,scale=6) private BigDecimal commercialExpenseAmount;
+  @Column(name="negotiation_adjustment",precision=18,scale=6) private BigDecimal negotiationAdjustment;
+  @Column(name="norm_snapshot_json",columnDefinition="JSON") private String normSnapshotJson;
+  @Column(name="sob_snapshot_json",columnDefinition="JSON") private String sobSnapshotJson;
+  @Column(name="config_snapshot_json",columnDefinition="JSON") private String configSnapshotJson;
+  @Column(name="locked_at") private Instant lockedAt;
+  @Column(name="locked_by",length=64) private String lockedBy;
+  @Column(name="submitted_at") private Instant submittedAt;
+  @Column(name="submitted_by",length=64) private String submittedBy;
+}

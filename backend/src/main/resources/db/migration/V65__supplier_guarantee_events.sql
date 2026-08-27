@@ -1,0 +1,27 @@
+-- V65: Supplier guarantee failure/event history (SRS guarantee evidence)
+CREATE TABLE supplier_guarantee_event (
+    event_id CHAR(36)  NOT NULL,
+    supplier_id CHAR(36)  NOT NULL,
+    guarantee_id CHAR(36),
+    event_date          DATE         NOT NULL,
+    event_type          VARCHAR(40)  NOT NULL,
+    description         VARCHAR(1000),
+    consequence_applied VARCHAR(1000),
+    penalty_amount      DECIMAL(18, 6),
+    currency_code       VARCHAR(3),
+    resolved_flag       BOOLEAN      NOT NULL DEFAULT FALSE,
+    resolution_summary  VARCHAR(1000),
+    evidence_status     VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    evidence_ref        VARCHAR(255),
+    verified_by CHAR(36),
+    verified_at         DATETIME(6),
+    notes               VARCHAR(1000),
+    created_by          VARCHAR(36),
+    created_at          DATETIME(6)  NOT NULL,
+    updated_by          VARCHAR(36),
+    updated_at          DATETIME(6),
+    PRIMARY KEY (event_id),
+    INDEX idx_sge_supplier_date (supplier_id, event_date),
+    INDEX idx_sge_guarantee (guarantee_id),
+    CONSTRAINT fk_sge_supplier FOREIGN KEY (supplier_id) REFERENCES supplier_master (supplier_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

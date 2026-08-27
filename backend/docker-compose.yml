@@ -1,0 +1,47 @@
+# Backend + MySQL only (see ../docker-compose.yml for full stack with frontend)
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: pcs-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: product_costing
+      MYSQL_USER: costing_app
+      MYSQL_PASSWORD: changeme1
+    ports:
+      - "3307:3306"
+    volumes:
+      - pcs_mysql_data:/var/lib/mysql
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--default-authentication-plugin=caching_sha2_password"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pcs-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DB_URL: jdbc:mysql://mysql:3306/product_costing?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+      DB_USERNAME: costing_app
+      DB_PASSWORD: changeme1
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-must-be-at-least-32-chars!!}
+      SERVER_PORT: "8080"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/actuator/health | grep -q UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+volumes:
+  pcs_mysql_data:

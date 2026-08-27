@@ -1,0 +1,70 @@
+# Host / production-style gate — run manually or on release tags
+# Does not require secrets; optional MySQL service for Flyway IT
+
+name: Release Gate
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*', 'V*']
+
+jobs:
+  backend-with-mysql:
+    name: Backend + MySQL Flyway IT
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_DATABASE: product_costing_it
+          MYSQL_USER: costing_app
+          MYSQL_PASSWORD: changeme
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -prootpass"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Import Costing golden/unit tests
+        run: mvn -B -Dtest=DutyEngineTest,TaxEngineTest,AllocationEngineTest,AllocationPerformanceTest,LandedCostEngineTest,ImportCostingServiceTest,AgreementEffectivenessEngineTest,OriginRuleEngineTest,TariffConcessionEngineTest,TradeRemedyEngineTest,FtaAnalysisServiceTest,ProofOfOriginServiceTest,FtaDataImportServiceTest,FtaImportDependencyTest test
+      - name: Full unit tests
+        run: mvn -B test
+      - name: Flyway integration test
+        env:
+          TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/product_costing_it?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+          TEST_DB_USER: costing_app
+          TEST_DB_PASSWORD: changeme
+        run: mvn -B -Dtest=FlywayMigrationIntegrationTest test
+
+  frontend-gate:
+    name: Frontend typecheck + test + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build

@@ -1,0 +1,67 @@
+# PRODUCTION-ORIENTED EXAMPLE — do not use rootpass/changeme
+# Copy to docker-compose.prod.yml and inject secrets via env file (not committed).
+# This file is NOT executed in the sandbox. For external Docker environments only.
+
+services:
+  redis:
+    image: redis:7-alpine
+    networks: [pcs-net]
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    # No public ports in production
+
+  mysql:
+    image: mysql:8.0
+    networks: [pcs-net]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    # Prefer private network only — do not publish 3306 to the internet
+    volumes:
+      - pcs_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u${DB_USER}", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    networks: [pcs-net]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mysql
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      RATE_LIMIT_STORE: redis
+      STORAGE_PROVIDER: s3
+      S3_BUCKET: ${S3_BUCKET}
+      S3_REGION: ${S3_REGION}
+    # Publish API only behind reverse proxy / load balancer
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    networks: [pcs-net]
+    depends_on: [backend]
+
+networks:
+  pcs-net:
+    driver: bridge
+
+volumes:
+  pcs_mysql_data:

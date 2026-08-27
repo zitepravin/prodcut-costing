@@ -1,0 +1,16 @@
+# Keep build context small; never send local build output into the daemon
+target/
+.git/
+.idea/
+.vscode/
+*.iml
+*.log
+docs/
+scripts/
+src/test/
+**/*Test.java
+**/test/**
+Dockerfile
+docker-compose.yml
+README.md
+BUILD.md

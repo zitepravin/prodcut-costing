@@ -1,0 +1,42 @@
+{
+  "id": "PC-XXXXX",
+  "category": "BOM",
+  "intent": "explain",
+  "question": "Customer-facing question in plain language",
+  "answer": "Headline context\n\nGuidance pointing to authorized services/screens. No invented money values.\n\nIf data is missing, say MISSING DATA explicitly.",
+  "source_alignment": {
+    "module": "BOM",
+    "authoritative_service": "BomNodeService",
+    "preferred_tools": "get_bom_tree, get_bom_node",
+    "source_detail": "What data the tool may return"
+  },
+  "response_strategy": {
+    "classify": "Classify the response as FACT, CALCULATED, RULE_RESULT, AI_INFERENCE, AI_RECOMMENDATION, MISSING_DATA, GUIDANCE, or SAFE_REFUSAL as appropriate.",
+    "retrieve": "Use the authorized get_bom_tree, get_bom_node paths through existing backend services.",
+    "guardrail": "Never invent financial values; never bypass tenant/module authorization; never perform autonomous business writes."
+  },
+  "data_classification": [
+    "FACT",
+    "CALCULATED",
+    "RULE_RESULT",
+    "AI_INFERENCE",
+    "AI_RECOMMENDATION",
+    "MISSING_DATA",
+    "GUIDANCE",
+    "SAFE_REFUSAL"
+  ],
+  "safe_actions": [
+    "read authorized Product Costing data",
+    "explain retrieved results in business language",
+    "classify FACT vs CALCULATED vs AI_RECOMMENDATION vs MISSING_DATA",
+    "point the user to the relevant application screen",
+    "list missing inputs without inventing values"
+  ],
+  "forbidden_actions": [
+    "invent material prices, process rates, tooling costs, targets, or FX rates",
+    "write or override BOM, cost, quote, or target records",
+    "approve or reject suppliers or workflow steps",
+    "bypass Central Access, tenant isolation, or RBAC",
+    "query the database directly"
+  ]
+}

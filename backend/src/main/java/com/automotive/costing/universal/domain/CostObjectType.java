@@ -1,0 +1,5 @@
+package com.automotive.costing.universal.domain;
+public enum CostObjectType {
+    PRODUCT, MATERIAL, SERVICE, JOB, WORK_ORDER, PROJECT, WBS, BATCH, PROCESS,
+    CONTRACT, CUSTOMER_ORDER, ASSET, MAINTENANCE_JOB, COST_CENTER, DEPARTMENT, ACTIVITY
+}

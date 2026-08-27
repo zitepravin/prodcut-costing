@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    hibernate:
+      # Integration tests assert Flyway schema; skip Hibernate validate (MariaDB TINYINT vs Integer noise)
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+  flyway:
+    enabled: true
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+    org.flywaydb: INFO

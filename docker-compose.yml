@@ -1,0 +1,95 @@
+# LOCAL DEVELOPMENT ONLY — credentials are intentionally weak.
+# Production: use docker-compose.prod.example.yml + secrets. DO NOT expose MySQL publicly.
+# Flyway: through V143 in MASTER-V274 package.
+# Product Costing + Supplier Intelligence — local Docker test stack
+# Usage:
+#   export DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1   # layer + mount cache
+#   export JWT_SECRET="$(openssl rand -base64 48)"
+#   docker compose up --build -d
+#
+# Host ports:
+#   Frontend  http://localhost:8088  (nginx → SPA + reverse proxy)
+#   Backend   http://localhost:8080  (direct API; optional when using FE proxy)
+#   MySQL     localhost:3307 → container 3306
+#
+# Internal Docker DNS (bridge network pcs-net):
+#   mysql:3306  ← backend JDBC (DB_URL host must be "mysql", not localhost)
+#   backend:8080 ← frontend nginx proxy_pass
+#
+# Flyway migrations: V1 → V129 (standalone PR + PO + email queue) (application-managed on backend start; includes PO + email queue)
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: pcs-mysql
+    networks: [pcs-net]
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: product_costing
+      MYSQL_USER: costing_app
+      MYSQL_PASSWORD: changeme1
+    ports:
+      - "3307:3306"
+    volumes:
+      - pcs_mysql_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=caching_sha2_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pcs-backend
+    networks: [pcs-net]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      # Service name "mysql" resolves on pcs-net — do NOT use localhost here
+      DB_URL: jdbc:mysql://mysql:3306/product_costing?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+      DB_USERNAME: costing_app
+      DB_PASSWORD: changeme1
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-must-be-at-least-32-chars!!}
+      SERVER_PORT: "8080"
+      # Used when browser calls backend:8080 directly; same-origin via :8088 needs no CORS
+      CORS_ORIGINS: http://localhost:8088,http://127.0.0.1:8088,http://localhost:5173,http://127.0.0.1:5173
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/actuator/health | grep -q UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Empty = relative /api → nginx → backend:8080 (preferred Docker path)
+        VITE_API_BASE_URL: ""
+    container_name: pcs-frontend
+    networks: [pcs-net]
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8088:80"
+
+networks:
+  pcs-net:
+    name: pcs-net
+    driver: bridge
+
+volumes:
+  pcs_mysql_data:

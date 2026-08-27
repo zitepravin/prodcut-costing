@@ -1,0 +1,69 @@
+# Production profile — SPRING_PROFILES_ACTIVE=prod
+# REQUIRED env (app fails closed if missing/weak):
+#   JWT_SECRET (>=32 chars, not placeholder)
+#   DB_HOST, DB_NAME, DB_USER, DB_PASSWORD
+#   REDIS_HOST (rate limiting)
+#   CORS_ORIGINS
+# FORBIDDEN: default passwords, public MySQL ports, memory rate-limit store
+
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?useSSL=${DB_USE_SSL:true}&requireSSL=${DB_REQUIRE_SSL:true}&serverTimezone=UTC&allowPublicKeyRetrieval=false
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${HIKARI_MAX_POOL:20}
+      minimum-idle: ${HIKARI_MIN_IDLE:5}
+      connection-timeout: 30000
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 30MB
+
+app:
+  security:
+    require-strong-jwt-secret: true
+    swagger-public: false
+    cors-allowed-origins: ${CORS_ORIGINS}
+    rate-limit-store: redis
+    api-rate-limit-enabled: true
+    api-rate-limit-max: ${API_RATE_LIMIT_MAX:600}
+    api-rate-limit-window-seconds: ${API_RATE_LIMIT_WINDOW_SEC:60}
+    upload-rate-limit-max: ${UPLOAD_RATE_LIMIT_MAX:30}
+    login-rate-limit-max-attempts: ${LOGIN_RATE_LIMIT_MAX:20}
+    login-rate-limit-window-seconds: ${LOGIN_RATE_LIMIT_WINDOW_SEC:300}
+  storage:
+    provider: ${STORAGE_PROVIDER:s3}
+    s3:
+      bucket: ${S3_BUCKET}
+      region: ${S3_REGION:us-east-1}
+      endpoint: ${S3_ENDPOINT:}
+  tenant:
+    seed-catalog-on-create: ${TENANT_SEED_CATALOG_ON_CREATE:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_EXPOSE:health,info,prometheus,metrics}
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    root: INFO
+    com.automotive.costing: INFO
+  pattern:
+    console: "%d{ISO8601} [%thread] %-5level %logger{36} correlationId=%X{correlationId} - %msg%n"

@@ -1,0 +1,28 @@
+-- V66: After-sales service metrics (SRS/questionnaire §11 — separate from warranty)
+CREATE TABLE supplier_after_sales_metric (
+    metric_id CHAR(36)  NOT NULL,
+    supplier_id CHAR(36)  NOT NULL,
+    period_start            DATE         NOT NULL,
+    period_end              DATE         NOT NULL,
+    response_time_hours     DECIMAL(12, 2),
+    resolution_time_hours   DECIMAL(12, 2),
+    emergency_support_flag  BOOLEAN,
+    field_support_flag      BOOLEAN,
+    spare_parts_available   BOOLEAN,
+    local_support_flag      BOOLEAN,
+    unresolved_complaints   INT,
+    avg_closure_days        DECIMAL(12, 2),
+    service_sla_met_percent DECIMAL(7, 4),
+    evidence_status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    evidence_ref            VARCHAR(255),
+    verified_by CHAR(36),
+    verified_at             DATETIME(6),
+    notes                   VARCHAR(1000),
+    created_by              VARCHAR(36),
+    created_at              DATETIME(6)  NOT NULL,
+    updated_by              VARCHAR(36),
+    updated_at              DATETIME(6),
+    PRIMARY KEY (metric_id),
+    INDEX idx_sas_supplier_period (supplier_id, period_end),
+    CONSTRAINT fk_sas_supplier FOREIGN KEY (supplier_id) REFERENCES supplier_master (supplier_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

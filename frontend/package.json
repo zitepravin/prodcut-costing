@@ -1,0 +1,72 @@
+{
+  "name": "product-costing-frontend",
+  "private": true,
+  "version": "0.91.0",
+  "type": "module",
+  "description": "Enterprise React UI for Automobile Product Costing + Vendor Selection. Aligns with product-costing-backend Flyway V90; Playwright smoke suite included.",
+  "keywords": [
+    "product-costing",
+    "should-cost",
+    "vendor-selection",
+    "supplier-qualification",
+    "tco",
+    "automotive",
+    "manufacturing",
+    "react",
+    "mui",
+    "typescript"
+  ],
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev": "npx vite",
+    "build": "npx tsc -b && npx vite build",
+    "lint": "oxlint",
+    "preview": "npx vite preview",
+    "typecheck": "npx tsc -b --pretty false",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test -c playwright.config.ts",
+    "test:e2e:ui": "playwright test -c playwright.config.ts --ui"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "~6.5.0",
+    "@mui/material": "~6.5.0",
+    "axios": "^1.19.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "vitest": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "@playwright/test": "^1.51.0"
+  },
+  "peerDependencies": {},
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

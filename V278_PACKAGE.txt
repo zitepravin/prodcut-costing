@@ -1,0 +1,4 @@
+PRODUCT-COSTING-SOFTWARE-MASTER-V278
+Built from V277 Phase 9 + V278 configuration architecture + universal costing foundation
+
+Migrations: V148 (actual_cost customer_id), V149 (config access), V150 (config definition editability), V151 (universal costing)

@@ -1,0 +1,9 @@
+package com.automotive.costing.masterdata.repository;
+
+import com.automotive.costing.masterdata.entity.UomMaster;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UomMasterRepository extends JpaRepository<UomMaster, String> {
+}

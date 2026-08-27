@@ -1,0 +1,46 @@
+-- V34: Vendor Selection B1 — supplier part/process capability + eligibility evaluation log
+CREATE TABLE supplier_capability (
+    capability_id CHAR(36)  NOT NULL,
+    supplier_id CHAR(36)  NOT NULL,
+    capability_type     VARCHAR(40)  NOT NULL,
+    capability_code     VARCHAR(100) NOT NULL,
+    capability_name     VARCHAR(200) NOT NULL,
+    process_code        VARCHAR(100),
+    commodity_code      VARCHAR(100),
+    plant_code          VARCHAR(100),
+    max_annual_capacity DECIMAL(18, 4),
+    capacity_uom        VARCHAR(20),
+    certified           BOOLEAN      NOT NULL DEFAULT FALSE,
+    valid_from          DATE,
+    valid_to            DATE,
+    status              VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
+    notes               VARCHAR(1000),
+    created_by          VARCHAR(36),
+    created_at          DATETIME(6)  NOT NULL,
+    updated_by          VARCHAR(36),
+    updated_at          DATETIME(6),
+    PRIMARY KEY (capability_id),
+    INDEX idx_sc_supplier_type (supplier_id, capability_type, status),
+    INDEX idx_sc_code (capability_code, status),
+    CONSTRAINT fk_sc_supplier FOREIGN KEY (supplier_id) REFERENCES supplier_master (supplier_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE supplier_eligibility_result (
+    result_id CHAR(36)  NOT NULL,
+    supplier_id CHAR(36)  NOT NULL,
+    bom_node_id CHAR(36),
+    program_id CHAR(36),
+    overall_eligible    BOOLEAN      NOT NULL,
+    failed_gates        VARCHAR(500),
+    evaluation_json     LONGTEXT,
+    evaluated_at        DATETIME(6)  NOT NULL,
+    evaluated_by        VARCHAR(36),
+    created_by          VARCHAR(36),
+    created_at          DATETIME(6)  NOT NULL,
+    updated_by          VARCHAR(36),
+    updated_at          DATETIME(6),
+    PRIMARY KEY (result_id),
+    INDEX idx_ser_supplier (supplier_id, evaluated_at),
+    INDEX idx_ser_bom (bom_node_id, evaluated_at),
+    CONSTRAINT fk_ser_supplier FOREIGN KEY (supplier_id) REFERENCES supplier_master (supplier_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

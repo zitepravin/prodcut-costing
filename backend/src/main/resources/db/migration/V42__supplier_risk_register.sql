@@ -1,0 +1,27 @@
+-- V42: Supplier risk register — visible separately from overall scorecard score
+CREATE TABLE supplier_risk (
+    risk_id CHAR(36)  NOT NULL,
+    supplier_id CHAR(36)  NOT NULL,
+    risk_category       VARCHAR(40)  NOT NULL,
+    risk_title          VARCHAR(200) NOT NULL,
+    description         VARCHAR(2000),
+    severity            VARCHAR(20)  NOT NULL,
+    likelihood          VARCHAR(20),
+    status              VARCHAR(20)  NOT NULL DEFAULT 'OPEN',
+    mitigation_plan     VARCHAR(2000),
+    residual_severity   VARCHAR(20),
+    evidence_status     VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    evidence_ref        VARCHAR(255),
+    identified_at       DATETIME(6)  NOT NULL,
+    identified_by       VARCHAR(36),
+    closed_at           DATETIME(6),
+    closed_by           VARCHAR(36),
+    created_by          VARCHAR(36),
+    created_at          DATETIME(6)  NOT NULL,
+    updated_by          VARCHAR(36),
+    updated_at          DATETIME(6),
+    PRIMARY KEY (risk_id),
+    INDEX idx_sr_supplier_status (supplier_id, status),
+    INDEX idx_sr_category_severity (risk_category, severity),
+    CONSTRAINT fk_sr_supplier FOREIGN KEY (supplier_id) REFERENCES supplier_master (supplier_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

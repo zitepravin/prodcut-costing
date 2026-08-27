@@ -1,0 +1,4 @@
+# SESSION_V245 — PO light close
+
+- PARTIALLY_RECEIVED + CLOSED
+- close API + FE + 16 PASS
